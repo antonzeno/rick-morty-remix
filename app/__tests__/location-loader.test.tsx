@@ -2,6 +2,8 @@ import { DataFunctionArgs } from "@remix-run/node";
 import { Location } from "generated/types";
 import { loader } from "~/routes/locations.$locationId";
 
+const CLIENT_URL = "http://localhost:3000";
+
 describe("Test locations path loader", () => {
     it("should fetch location with id 1", async () => {
         const mockedLocation = {
@@ -11,7 +13,7 @@ describe("Test locations path loader", () => {
             type: "Planet",
         };
 
-        const mockRequest = new Request(`https://localhost:3000/locations/${mockedLocation.id}`);
+        const mockRequest = new Request(`${CLIENT_URL}/locations/${mockedLocation.id}`);
 
         const data = (await loader({
             request: mockRequest,
@@ -29,7 +31,7 @@ describe("Test locations path loader", () => {
     });
 
     it("should catch error when id is not a number", async () => {
-        const mockRequest = new Request("https://localhost:3000/locations/a");
+        const mockRequest = new Request(`${CLIENT_URL}/locations/a`);
 
         try {
             await loader({

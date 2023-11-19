@@ -1,38 +1,26 @@
-# Welcome to Remix!
+# Welcome to Rick and Morty
 
-- [Remix Docs](https://remix.run/docs)
+## Installation
 
-## Development
+Clone the repository.
 
-From your terminal:
+### From your terminal run:
+
+```sh
+npm install
+```
+
+This installs all the dependencies.
+
+### Create a .env file in the root of the project and add this line:
+
+CLIENT_URL="http://localhost:3000" #default
+API_URL="https://rickandmortyapi.com/graphql/" #GraphQL api url
+
+### Then run:
 
 ```sh
 npm run dev
 ```
 
 This starts your app in development mode, rebuilding assets on file changes.
-
-## Deployment
-
-First, build your app for production:
-
-```sh
-npm run build
-```
-
-Then run the app in production mode:
-
-```sh
-npm start
-```
-
-Now you'll need to pick a host to deploy it to.
-
-### DIY
-
-If you're familiar with deploying node applications, the built-in Remix app server is production-ready.
-
-Make sure to deploy the output of `remix build`
-
-- `build/`
-- `public/build/`
