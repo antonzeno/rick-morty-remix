@@ -1,10 +1,6 @@
 import { Character, Location } from "generated/types";
 
-interface LocationStatsProps {
-    location: Location;
-}
-
-const LocationStats = ({ location }: LocationStatsProps) => {
+const LocationStats = ({ location }: { location: Location }) => {
     const { aliveCount, deadCount, guestCount } = getResidentStatusStats(location.residents as Character[]);
     const { robotCount, humanCount, alienCount } = getResidentTypeStats(location.residents as Character[]);
 

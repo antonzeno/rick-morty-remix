@@ -4,7 +4,6 @@ import { gql } from "graphql-request";
 import { client } from "~/graphql/client";
 import { Location, Character } from "generated/types";
 import LocationStats from "~/components/LocationStats";
-import { GlobalErrorBoundary } from "~/components/GlobalErrorBoundary";
 
 const LOCATION_QUERY = gql`
     query GetLocation($id: ID!) {
