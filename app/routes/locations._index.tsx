@@ -5,6 +5,7 @@ import { gql } from "graphql-request";
 import { Info, Location, Locations } from "generated/types";
 import Pagination from "~/components/Pagination";
 import LocationsFilter from "~/components/filters/LocationsFilter";
+import LocationItemCard from "~/components/LocationItemCard";
 
 export const meta: MetaFunction = () => {
     return [{ title: "Locations" }, { name: "description", content: "Explore locations" }];
@@ -67,22 +68,7 @@ export default function LocationsPage() {
                     <div className="col-md-9">
                         <div className="row">
                             {results.length > 0 ? (
-                                results.map((location) => (
-                                    <div key={location.id} className="col-sm-6 col-md-4 mb-3">
-                                        <div className="card shadow-sm">
-                                            <div className="card-body">
-                                                <h6 className="card-title fw-bold">{location.name}</h6>
-
-                                                <div className="small text-muted card-text">Type: {location.type}</div>
-                                                <div className="small text-muted card-text">Dimension: {location.dimension}</div>
-
-                                                <Link to={`/locations/${location.id}`} className="btn btn-outline-success btn-sm w-100">
-                                                    Explore
-                                                </Link>
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))
+                                results.map((location) => <LocationItemCard key={location.id as string} location={location} />)
                             ) : (
                                 <div className="d-flex justify-content-center align-items-center fw-bold">
                                     No results found for your search

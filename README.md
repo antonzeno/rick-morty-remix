@@ -23,4 +23,14 @@ API_URL="https://rickandmortyapi.com/graphql/" #GraphQL api url
 npm run dev
 ```
 
-This starts your app in development mode, rebuilding assets on file changes.
+This starts the app in development mode, rebuilding assets on file changes.
+
+## Testing
+
+### From your terminal run:
+
+```sh
+npx jest
+```
+
+This runs the unit tests

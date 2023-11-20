@@ -4,7 +4,7 @@ import { loader } from "~/routes/locations.$locationId";
 
 const CLIENT_URL = "http://localhost:3000";
 
-describe("Test locations path loader", () => {
+describe("Test location loader", () => {
     it("should fetch location with id 1", async () => {
         const mockedLocation = {
             dimension: "Dimension C-137",
