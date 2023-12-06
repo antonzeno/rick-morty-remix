@@ -1,10 +1,8 @@
-import { LoaderFunctionArgs } from "@remix-run/node";
-import { Link, useLoaderData } from "@remix-run/react";
-import { gql } from "graphql-request";
-import { client } from "~/graphql/client";
-import { Location, Character } from "generated/types";
+import { Link, useParams } from "@remix-run/react";
+import { gql, useQuery } from "@apollo/client/index.js";
 import LocationStats from "~/components/LocationStats";
 import CharacterItemCard from "~/components/CharacterItemCard";
+import { Location } from "generated/types";
 
 const LOCATION_QUERY = gql`
     query GetLocation($id: ID!) {
@@ -24,29 +22,33 @@ const LOCATION_QUERY = gql`
     }
 `;
 
-export async function loader({ params }: LoaderFunctionArgs) {
-    try {
-        const data = await client.request(LOCATION_QUERY, { id: params.locationId });
-        return data;
-    } catch (error) {
-        throw new Error("Oh no! Something went wrong!");
-    }
-}
-
 const LocationPage = () => {
-    const { location } = useLoaderData<typeof loader>() as { location: Location };
+    const { locationId } = useParams();
+
+    const { loading, error, data } = useQuery(LOCATION_QUERY, {
+        variables: {
+            id: locationId,
+        },
+    });
+
+    const location: Location = data?.location;
 
     return (
         <>
-            <LocationStats location={location} />
+            {!loading && (
+                <>
+                    <LocationStats location={location} />
 
-            <div className="container">
-                <div className="row">
-                    {location.residents.map((resident) => {
-                        return <CharacterItemCard key={resident?.id} resident={resident!} />;
-                    })}
-                </div>
-            </div>
+                    <div className="container">
+                        <div className="row">
+                            {location &&
+                                location.residents.map((resident) => {
+                                    return <CharacterItemCard key={resident?.id} resident={resident!} />;
+                                })}
+                        </div>
+                    </div>
+                </>
+            )}
         </>
     );
 };

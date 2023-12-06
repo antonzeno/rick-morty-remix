@@ -5,6 +5,7 @@ import { Layout } from "~/components/Layout";
 import { cssBundleHref } from "@remix-run/css-bundle";
 import globalStylesHref from "~/assets/global.css";
 import { ChildrenProps } from "~/types/types";
+import { ApolloClient, ApolloProvider, InMemoryCache, createHttpLink } from "@apollo/client/index.js";
 
 export const links: LinksFunction = () => [
     ...(cssBundleHref ? [{ rel: "stylesheet", href: cssBundleHref }] : []),
@@ -26,13 +27,26 @@ export const meta: MetaFunction = () => {
     ];
 };
 
+const graphQLClient = new ApolloClient({
+    ssrMode: true,
+    link: createHttpLink({
+        uri: "https://rickandmortyapi.com/graphql",
+        headers: {
+            "Access-Control-Allow-Origin": "*",
+        },
+    }),
+    cache: new InMemoryCache(), // Cache management
+});
+
 export default function App() {
     return (
-        <Document>
-            <Layout>
-                <Outlet />
-            </Layout>
-        </Document>
+        <ApolloProvider client={graphQLClient}>
+            <Document>
+                <Layout>
+                    <Outlet />
+                </Layout>
+            </Document>
+        </ApolloProvider>
     );
 }
 

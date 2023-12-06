@@ -1,7 +1,6 @@
 import type { LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
-import { Link, useLoaderData } from "@remix-run/react";
-import { client } from "~/graphql/client";
-import { gql } from "graphql-request";
+import { Link, useLocation } from "@remix-run/react";
+import { gql, useQuery } from "@apollo/client/index.js";
 import { Info, Location, Locations } from "generated/types";
 import Pagination from "~/components/Pagination";
 import LocationsFilter from "~/components/filters/LocationsFilter";
@@ -30,29 +29,23 @@ const LOCATIONS_QUERY = gql`
     }
 `;
 
-export async function loader({ request }: LoaderFunctionArgs) {
-    try {
-        const url = new URL(request.url);
-        const page = Number(url.searchParams.get("page") || 1);
-        const type = url.searchParams.get("type") || "";
-        const dimension = url.searchParams.get("dimension") || "";
+export default function LocationsPage() {
+    const location = useLocation();
+    const urlParams = new URLSearchParams(location.search);
+    const page = Number(urlParams.get("page")) || 1;
+    const type = urlParams.get("type") || "";
+    const dimension = urlParams.get("dimension") || "";
 
-        const data = await client.request(LOCATIONS_QUERY, {
+    const { loading, error, data } = useQuery(LOCATIONS_QUERY, {
+        variables: {
             page,
             type,
             dimension,
-        });
-        return data;
-    } catch (error) {
-        throw new Error("Oh no! Something went wrong!");
-    }
-}
+        },
+    });
 
-export default function LocationsPage() {
-    const { locations } = useLoaderData<typeof loader>() as { locations: Locations };
-
-    const info: Info | undefined = locations?.info ?? undefined;
-    const results: Location[] | null = (locations?.results ?? [])!.filter((result): result is Location => result !== null);
+    const info: Info | undefined = data?.locations?.info ?? undefined;
+    const results: Location[] | null = (data?.locations?.results ?? [])!.filter((result: any): result is Location => result !== null);
 
     return (
         <div>
@@ -67,7 +60,7 @@ export default function LocationsPage() {
 
                     <div className="col-md-9">
                         <div className="row">
-                            {results.length > 0 ? (
+                            {results && results.length > 0 ? (
                                 results.map((location) => <LocationItemCard key={location.id as string} location={location} />)
                             ) : (
                                 <div className="d-flex justify-content-center align-items-center fw-bold">
