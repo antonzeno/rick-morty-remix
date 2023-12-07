@@ -8,7 +8,7 @@ interface PaginationProps {
 
 const AdvancedPagination = ({ info }: PaginationProps) => {
     const [searchParams, setSearchParams] = useSearchParams();
-    let page = Number(searchParams.get("page"));
+    let page = Number(searchParams.get("page") ?? 1);
     const totalPages = info?.pages ?? 0;
     const showPages = 5;
 
