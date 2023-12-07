@@ -1,4 +1,4 @@
-import { Link, useSearchParams } from "@remix-run/react";
+import { useSearchParams } from "@remix-run/react";
 import { Info } from "generated/types";
 
 interface PaginationProps {
@@ -19,7 +19,7 @@ const Pagination = ({ info }: PaginationProps) => {
         });
     };
 
-    if (info?.prev === null && info?.next === null) {
+    if (!info || (info?.prev === null && info?.next === null)) {
         return <></>;
     }
 

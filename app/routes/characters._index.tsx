@@ -1,10 +1,10 @@
 import { Form, Link, useLocation, useParams } from "@remix-run/react";
 import { gql, useQuery, useLazyQuery } from "@apollo/client/index.js";
 import CharacterItemCard from "~/components/CharacterItemCard";
-import { Character } from "generated/types";
-import Pagination from "~/components/Pagination";
+import { Character, Info } from "generated/types";
 import { redirect, type ActionFunctionArgs } from "@remix-run/node";
 import _ from "lodash";
+import AdvancedPagination from "~/components/AdvancedPagination";
 
 const CHARACTERS_QUERY = gql`
     query GetCharacters($page: Int!, $name: String) {
@@ -49,6 +49,7 @@ const CharactersPage = () => {
     });
 
     const characters: Character[] = data?.characters.results;
+    const info: Info = data?.characters.info;
 
     const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         getCharacterSuggestions({
@@ -65,7 +66,7 @@ const CharactersPage = () => {
             {!loading && (
                 <>
                     <div className="bg-light mb-3 m-0 py-2 d-flex justify-content-center flex-column align-items-center">
-                        <div className="h1">Search for your favorite character:</div>
+                        <div className="h1 fw-bold">Search for your favorite character:</div>
                         <Form action="/characters" method="post">
                             <input
                                 name="name"
@@ -100,7 +101,7 @@ const CharactersPage = () => {
                         </div>
                     }
 
-                    <Pagination route={"characters"} />
+                    <AdvancedPagination route={"characters"} info={info} />
                 </>
             )}
         </>
