@@ -1,0 +1,96 @@
+import { Form, Link, useLocation, useParams } from "@remix-run/react";
+import { gql, useQuery } from "@apollo/client/index.js";
+import CharacterItemCard from "~/components/CharacterItemCard";
+import { Character, Location } from "generated/types";
+import Pagination from "~/components/Pagination";
+import { redirect, type ActionFunctionArgs } from "@remix-run/node";
+
+const CHARACTERS_QUERY = gql`
+    query GetCharacters($page: Int!, $name: String) {
+        characters(page: $page, filter: { name: $name }) {
+            info {
+                count
+                pages
+                next
+                prev
+            }
+            results {
+                id
+                name
+                status
+                species
+                gender
+                image
+            }
+        }
+    }
+`;
+
+export async function action({ request }: ActionFunctionArgs) {
+    const body = await request.formData();
+    const name = body.get("name");
+    return redirect(`?q=${name}`);
+}
+
+const CharactersPage = () => {
+    const location = useLocation();
+    const urlParams = new URLSearchParams(location.search);
+    const page = Number(urlParams.get("page")) || 1;
+    const q = urlParams.get("q") || "";
+
+    const {
+        loading: loadingResults,
+        error,
+        data: results,
+    } = useQuery(CHARACTERS_QUERY, {
+        variables: {
+            page,
+            name: q,
+        },
+    });
+
+    const characters: Character[] = results?.characters.results;
+
+    return (
+        <>
+            {!loadingResults && (
+                <>
+                    <div className="bg-light mb-3 m-0 py-2 d-flex justify-content-center flex-column align-items-center">
+                        <div className="h1">Search for your favorite character:</div>
+                        <Form action="/characters" method="post">
+                            <input name="name" type="text" className="me-2 p-1 border-success rounded" defaultValue={q || ""} />
+                            <button className="btn btn-outline-success" type="submit">
+                                Search
+                            </button>
+                        </Form>
+                    </div>
+                    {
+                        <div className="container">
+                            <div className="row">
+                                {characters &&
+                                    characters.map((resident) => {
+                                        return <CharacterItemCard key={resident?.id} resident={resident!} />;
+                                    })}
+                            </div>
+                        </div>
+                    }
+
+                    <Pagination route={"characters"} />
+                </>
+            )}
+        </>
+    );
+};
+
+export default CharactersPage;
+
+export function ErrorBoundary() {
+    return (
+        <div className="d-flex flex-column justify-content-center align-items-center vh-100">
+            <div className="mb-2">Looks like there is nothing to see here.</div>
+            <Link to="/locations" className="btn btn-outline-success my-2">
+                Explore locations
+            </Link>
+        </div>
+    );
+}

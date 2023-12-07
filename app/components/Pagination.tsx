@@ -24,7 +24,7 @@ const Pagination = ({ info }: PaginationProps) => {
     }
 
     return (
-        <div className="d-flex justify-content-center align-items-center">
+        <div className="d-flex justify-content-center align-items-center mb-2">
             <button onClick={() => handlePagination(page - 1)} className={`btn btn-success mx-2 ${info?.prev === null && "disabled"}`}>
                 Previous
             </button>

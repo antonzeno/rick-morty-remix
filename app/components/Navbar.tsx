@@ -17,6 +17,9 @@ const Navbar = () => {
                     <NavLink to="/locations" className={({ isActive }) => `mx-3 rounded-pill ${isActive ? "btn btn-dark" : "nav-link"}`}>
                         Locations
                     </NavLink>
+                    <NavLink to="/characters" className={({ isActive }) => `mx-3 rounded-pill ${isActive ? "btn btn-dark" : "nav-link"}`}>
+                        Characters
+                    </NavLink>
                 </div>
             </div>
         </nav>

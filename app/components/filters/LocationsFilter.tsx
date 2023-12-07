@@ -23,7 +23,7 @@ const LocationsFilter = () => {
     const renderParams = (params: string[], key: string) => {
         return params.map((param) => (
             <div className="p-1 m-1 d-flex justify-content-between border rounded bg-light" key={param}>
-                <div className="fw-bold">{param}</div>
+                <div>{param}</div>
                 <div role="button" className="fw-bold" onClick={() => resetParams(key)}>
                     X
                 </div>
