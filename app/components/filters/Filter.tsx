@@ -1,4 +1,4 @@
-import { Link, useSearchParams } from "@remix-run/react";
+import { useSearchParams } from "@remix-run/react";
 import { useState } from "react";
 
 interface FilterProps {
@@ -26,7 +26,7 @@ const Filter = ({ type, data }: FilterProps) => {
 
     return (
         <div className="border mb-2">
-            <div onClick={() => handleFilterExpand()} className="fw-bold bg-light p-2 d-flex justify-content-between">
+            <div onClick={() => handleFilterExpand()} className="fw-bold bg-light p-2 d-flex justify-content-between" role="button">
                 <div>{type.toUpperCase()}</div>
                 <div>{expanded ? "\u25B2" : "\u25BC"}</div>
             </div>
