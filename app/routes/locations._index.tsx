@@ -1,10 +1,17 @@
-import type { LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
+import type { LinksFunction, MetaFunction } from "@remix-run/node";
 import { Link, useLocation } from "@remix-run/react";
 import { gql, useQuery } from "@apollo/client/index.js";
-import { Info, Location, Locations } from "generated/types";
+import { Info, Location } from "generated/types";
+import Skeleton from "react-loading-skeleton";
+
 import Pagination from "~/components/Pagination";
 import LocationsFilter from "~/components/filters/LocationsFilter";
 import LocationItemCard from "~/components/LocationItemCard";
+
+import skeletonCss from "react-loading-skeleton/dist/skeleton.css";
+import LocationLoadingSkeleton from "~/components/skeletons/LocationLoadingSkeleton";
+
+export const links: LinksFunction = () => [{ rel: "stylesheet", href: skeletonCss }];
 
 export const meta: MetaFunction = () => {
     return [{ title: "Locations" }, { name: "description", content: "Explore locations" }];
@@ -46,6 +53,10 @@ export default function LocationsPage() {
 
     const info: Info | undefined = data?.locations?.info ?? undefined;
     const results: Location[] | null = (data?.locations?.results ?? [])!.filter((result: any): result is Location => result !== null);
+
+    if (loading) {
+        return <LocationLoadingSkeleton />;
+    }
 
     return (
         <div>
