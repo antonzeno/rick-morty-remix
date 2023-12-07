@@ -1,9 +1,10 @@
 import { Form, Link, useLocation, useParams } from "@remix-run/react";
-import { gql, useQuery } from "@apollo/client/index.js";
+import { gql, useQuery, useLazyQuery } from "@apollo/client/index.js";
 import CharacterItemCard from "~/components/CharacterItemCard";
-import { Character, Location } from "generated/types";
+import { Character } from "generated/types";
 import Pagination from "~/components/Pagination";
 import { redirect, type ActionFunctionArgs } from "@remix-run/node";
+import _ from "lodash";
 
 const CHARACTERS_QUERY = gql`
     query GetCharacters($page: Int!, $name: String) {
@@ -34,31 +35,55 @@ export async function action({ request }: ActionFunctionArgs) {
 
 const CharactersPage = () => {
     const location = useLocation();
+    const [getCharacterSuggestions, { loading: loadingSuggestions, data: suggestionsData }] = useLazyQuery(CHARACTERS_QUERY);
+
     const urlParams = new URLSearchParams(location.search);
     const page = Number(urlParams.get("page")) || 1;
     const q = urlParams.get("q") || "";
 
-    const {
-        loading: loadingResults,
-        error,
-        data: results,
-    } = useQuery(CHARACTERS_QUERY, {
+    const { loading, error, data } = useQuery(CHARACTERS_QUERY, {
         variables: {
             page,
             name: q,
         },
     });
 
-    const characters: Character[] = results?.characters.results;
+    const characters: Character[] = data?.characters.results;
+
+    const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        getCharacterSuggestions({
+            variables: {
+                page: 1,
+                name: e.target.value,
+            },
+        });
+    };
+    const debouncedOnChange = _.debounce(onChange, 500);
 
     return (
         <>
-            {!loadingResults && (
+            {!loading && (
                 <>
                     <div className="bg-light mb-3 m-0 py-2 d-flex justify-content-center flex-column align-items-center">
                         <div className="h1">Search for your favorite character:</div>
                         <Form action="/characters" method="post">
-                            <input name="name" type="text" className="me-2 p-1 border-success rounded" defaultValue={q || ""} />
+                            <input
+                                name="name"
+                                type="text"
+                                className="me-2 p-1 border-success rounded"
+                                defaultValue={q || ""}
+                                list="suggestions"
+                                onChange={debouncedOnChange}
+                            />
+
+                            {!loadingSuggestions && (
+                                <datalist id="suggestions">
+                                    {suggestionsData?.characters?.results &&
+                                        (suggestionsData?.characters?.results as Character[]).map((item) => {
+                                            return <option key={item.id} value={item.name!} />;
+                                        })}
+                                </datalist>
+                            )}
                             <button className="btn btn-outline-success" type="submit">
                                 Search
                             </button>
