@@ -1,16 +1,23 @@
 import { Character } from "generated/types";
-import React from "react";
+import React, { useEffect } from "react";
+import { MdFavorite, MdFavoriteBorder } from "react-icons/md/index.js";
+import { useFavorites } from "~/hooks/useFavorites";
 
 interface CharacterItemCardProps {
     resident: Character;
+    isFavorite: boolean;
+    toggleFavorite: any;
 }
 
-const CharacterItemCard: React.FC<CharacterItemCardProps> = ({ resident }) => {
+const CharacterItemCard: React.FC<CharacterItemCardProps> = ({ resident, isFavorite, toggleFavorite }) => {
     return (
         <div className="col-12 col-sm-6 col-md-3 mb-3">
             <div className="card shadow-sm">
-                <div className="card-head">
+                <div className="card-head position-relative">
                     <img src={resident?.image ?? ""} alt="" className="w-100" />
+                    <button className="position-absolute top-0 end-0 btn btn-sm btn-light m-2" onClick={() => toggleFavorite(resident.id!)}>
+                        {isFavorite ? <MdFavorite size={18} /> : <MdFavoriteBorder size={18} />}
+                    </button>
                 </div>
                 <div className="card-body">
                     <h6 className="card-title fw-bold">

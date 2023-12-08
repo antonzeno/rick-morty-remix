@@ -5,6 +5,7 @@ import { Character, Info } from "generated/types";
 import { redirect, type ActionFunctionArgs } from "@remix-run/node";
 import _ from "lodash";
 import AdvancedPagination from "~/components/AdvancedPagination";
+import { useFavorites } from "~/hooks/useFavorites";
 
 const CHARACTERS_QUERY = gql`
     query GetCharacters($page: Int!, $name: String) {
@@ -36,6 +37,7 @@ export async function action({ request }: ActionFunctionArgs) {
 const CharactersPage = () => {
     const location = useLocation();
     const [getCharacterSuggestions, { loading: loadingSuggestions, data: suggestionsData }] = useLazyQuery(CHARACTERS_QUERY);
+    const { favorites, toggleFavorite } = useFavorites();
 
     const urlParams = new URLSearchParams(location.search);
     const page = Number(urlParams.get("page")) || 1;
@@ -95,7 +97,14 @@ const CharactersPage = () => {
                             <div className="row">
                                 {characters &&
                                     characters.map((resident) => {
-                                        return <CharacterItemCard key={resident?.id} resident={resident!} />;
+                                        return (
+                                            <CharacterItemCard
+                                                key={resident?.id}
+                                                resident={resident!}
+                                                isFavorite={favorites.includes(resident.id!)}
+                                                toggleFavorite={() => toggleFavorite(resident.id!)}
+                                            />
+                                        );
                                     })}
                             </div>
                         </div>

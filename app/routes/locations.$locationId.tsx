@@ -3,6 +3,7 @@ import { gql, useQuery } from "@apollo/client/index.js";
 import LocationStats from "~/components/LocationStats";
 import CharacterItemCard from "~/components/CharacterItemCard";
 import { Location } from "generated/types";
+import { useFavorites } from "~/hooks/useFavorites";
 
 const LOCATION_QUERY = gql`
     query GetLocation($id: ID!) {
@@ -24,6 +25,7 @@ const LOCATION_QUERY = gql`
 
 const LocationPage = () => {
     const { locationId } = useParams();
+    const { favorites, toggleFavorite } = useFavorites();
 
     const { loading, error, data } = useQuery(LOCATION_QUERY, {
         variables: {
@@ -43,7 +45,14 @@ const LocationPage = () => {
                         <div className="row">
                             {location &&
                                 location.residents.map((resident) => {
-                                    return <CharacterItemCard key={resident?.id} resident={resident!} />;
+                                    return (
+                                        <CharacterItemCard
+                                            key={resident?.id}
+                                            resident={resident!}
+                                            isFavorite={favorites.includes(resident?.id!)}
+                                            toggleFavorite={() => toggleFavorite(resident?.id!)}
+                                        />
+                                    );
                                 })}
                         </div>
                     </div>
