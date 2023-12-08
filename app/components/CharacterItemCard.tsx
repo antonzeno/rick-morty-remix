@@ -1,12 +1,11 @@
 import { Character } from "generated/types";
-import React, { useEffect } from "react";
+import React from "react";
 import { MdFavorite, MdFavoriteBorder } from "react-icons/md/index.js";
-import { useFavorites } from "~/hooks/useFavorites";
 
 interface CharacterItemCardProps {
     resident: Character;
     isFavorite: boolean;
-    toggleFavorite: any;
+    toggleFavorite: (id: string) => void;
 }
 
 const CharacterItemCard: React.FC<CharacterItemCardProps> = ({ resident, isFavorite, toggleFavorite }) => {
