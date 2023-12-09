@@ -4,6 +4,8 @@ import LocationStats from "~/components/LocationStats";
 import CharacterItemCard from "~/components/CharacterItemCard";
 import { Location } from "generated/types";
 import { useFavorites } from "~/hooks/useFavorites";
+import { jsonWithToast } from "remix-toast";
+import { ActionFunctionArgs } from "@remix-run/node";
 
 const LOCATION_QUERY = gql`
     query GetLocation($id: ID!) {
@@ -22,6 +24,21 @@ const LOCATION_QUERY = gql`
         }
     }
 `;
+
+export async function action({ request }: ActionFunctionArgs) {
+    let formData = await request.formData();
+    const action = formData.get("action");
+
+    switch (action) {
+        case "favorite":
+            const isFavorite = formData.get("isFavorite") === "true";
+            return jsonWithToast("Favorites", {
+                message: isFavorite ? "Character removed from favorites" : "Character added to favorites",
+                type: "success",
+            });
+    }
+    return null;
+}
 
 const LocationPage = () => {
     const { locationId } = useParams();
