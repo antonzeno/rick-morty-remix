@@ -1,6 +1,9 @@
+import { Form } from "@remix-run/react";
 import { Character } from "generated/types";
 import React from "react";
 import { MdFavorite, MdFavoriteBorder } from "react-icons/md/index.js";
+import { useFetcher } from "@remix-run/react";
+import { useFavorites } from "~/hooks/useFavorites";
 
 interface CharacterItemCardProps {
     resident: Character;
@@ -9,12 +12,20 @@ interface CharacterItemCardProps {
 }
 
 const CharacterItemCard: React.FC<CharacterItemCardProps> = ({ resident, isFavorite, toggleFavorite }) => {
+    let fetcher = useFetcher();
+
     return (
         <div className="col-12 col-sm-6 col-md-3 mb-3">
             <div className="card shadow-sm">
                 <div className="card-head position-relative">
                     <img src={resident?.image ?? ""} alt="" className="w-100" />
-                    <button className="position-absolute top-0 end-0 btn btn-sm btn-light m-2" onClick={() => toggleFavorite(resident.id!)}>
+                    <button
+                        className="position-absolute top-0 end-0 btn btn-sm btn-light m-2"
+                        onClick={() => {
+                            fetcher.submit({ action: "favorite", residentId: resident.id!, isFavorite }, { method: "POST" });
+                            toggleFavorite(resident.id!);
+                        }}
+                    >
                         {isFavorite ? <MdFavorite size={18} /> : <MdFavoriteBorder size={18} />}
                     </button>
                 </div>

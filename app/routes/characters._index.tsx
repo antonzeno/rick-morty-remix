@@ -1,11 +1,12 @@
-import { Form, Link, useLocation, useParams } from "@remix-run/react";
+import { Form, Link, useActionData, useFetcher, useLocation, useParams } from "@remix-run/react";
 import { gql, useQuery, useLazyQuery } from "@apollo/client/index.js";
 import CharacterItemCard from "~/components/CharacterItemCard";
 import { Character, Info } from "generated/types";
-import { redirect, type ActionFunctionArgs } from "@remix-run/node";
+import { redirect, type ActionFunctionArgs, json } from "@remix-run/node";
 import _ from "lodash";
 import AdvancedPagination from "~/components/AdvancedPagination";
 import { useFavorites } from "~/hooks/useFavorites";
+import { jsonWithToast, redirectWithToast } from "remix-toast";
 
 const CHARACTERS_QUERY = gql`
     query GetCharacters($page: Int!, $name: String) {
@@ -29,13 +30,26 @@ const CHARACTERS_QUERY = gql`
 `;
 
 export async function action({ request }: ActionFunctionArgs) {
-    const body = await request.formData();
-    const name = body.get("name");
-    return redirect(`?q=${name}`);
+    let formData = await request.formData();
+    const action = formData.get("action");
+
+    switch (action) {
+        case "favorite":
+            const isFavorite = formData.get("isFavorite") === "true";
+            return jsonWithToast("Favorites", {
+                message: isFavorite ? "Character removed from favorites" : "Character added to favorites",
+                type: "success",
+            });
+        case "search":
+            const name = formData.get("name");
+            return redirect(`?q=${name}`);
+    }
+    return null;
 }
 
 const CharactersPage = () => {
     const location = useLocation();
+    const fetcher = useFetcher();
     const [getCharacterSuggestions, { loading: loadingSuggestions, data: suggestionsData }] = useLazyQuery(CHARACTERS_QUERY);
     const { favorites, toggleFavorite } = useFavorites();
 
@@ -69,7 +83,7 @@ const CharactersPage = () => {
                 <>
                     <div className="bg-light mb-3 m-0 py-2 d-flex justify-content-center flex-column align-items-center">
                         <div className="h1 fw-bold">Search for your favorite character:</div>
-                        <Form action="/characters" method="post">
+                        <fetcher.Form method="post">
                             <input
                                 name="name"
                                 type="text"
@@ -78,6 +92,8 @@ const CharactersPage = () => {
                                 list="suggestions"
                                 onChange={debouncedOnChange}
                             />
+
+                            <input type="hidden" name="action" value="search" />
 
                             {!loadingSuggestions && (
                                 <datalist id="suggestions">
@@ -90,7 +106,7 @@ const CharactersPage = () => {
                             <button className="btn btn-outline-success" type="submit">
                                 Search
                             </button>
-                        </Form>
+                        </fetcher.Form>
                     </div>
                     {
                         <div className="container">
