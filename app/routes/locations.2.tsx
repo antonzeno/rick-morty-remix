@@ -1,15 +1,12 @@
 import type { LinksFunction, MetaFunction } from "@remix-run/node";
 import { Link, useLocation } from "@remix-run/react";
-import { gql, useQuery } from "@apollo/client/index.js";
-import { Info, Location } from "generated/types";
-import Skeleton from "react-loading-skeleton";
+import { useCallback, useEffect, useState } from "react";
 
-import Pagination from "~/components/Pagination";
 import LocationsFilter from "~/components/filters/LocationsFilter";
 import LocationItemCard from "~/components/LocationItemCard";
-
-import skeletonCss from "react-loading-skeleton/dist/skeleton.css";
 import LocationLoadingSkeleton from "~/components/skeletons/LocationLoadingSkeleton";
+import useLocations from "~/hooks/useLocations";
+import skeletonCss from "react-loading-skeleton/dist/skeleton.css";
 
 export const links: LinksFunction = () => [{ rel: "stylesheet", href: skeletonCss }];
 
@@ -17,42 +14,47 @@ export const meta: MetaFunction = () => {
     return [{ title: "Locations" }, { name: "description", content: "Explore locations" }];
 };
 
-const LOCATIONS_QUERY = gql`
-    query GetLocations($page: Int!, $type: String, $dimension: String) {
-        locations(page: $page, filter: { type: $type, dimension: $dimension }) {
-            info {
-                count
-                pages
-                next
-                prev
-            }
-            results {
-                id
-                name
-                type
-                dimension
-            }
-        }
-    }
-`;
-
 export default function LocationsPage() {
     const location = useLocation();
     const urlParams = new URLSearchParams(location.search);
-    const page = Number(urlParams.get("page")) || 1;
     const type = urlParams.get("type") || "";
     const dimension = urlParams.get("dimension") || "";
+    const { loading, error, info, results, fetchMore } = useLocations({ page: 1, type, dimension });
+    const [reachedBottom, setReachedBottom] = useState(false);
 
-    const { loading, error, data } = useQuery(LOCATIONS_QUERY, {
-        variables: {
-            page,
-            type,
-            dimension,
-        },
-    });
+    const fetchNewData = async () => {
+        if (info?.next! !== null) {
+            fetchMore({
+                page: info?.next!,
+                type,
+                dimension,
+            });
+        }
+    };
 
-    const info: Info | undefined = data?.locations?.info ?? undefined;
-    const results: Location[] | null = (data?.locations?.results ?? [])!.filter((result: any): result is Location => result !== null);
+    useEffect(() => {
+        if (reachedBottom && !loading && !error && info) {
+            fetchNewData().then(() => setReachedBottom(false));
+        }
+    }, [reachedBottom, loading, error, info, fetchMore]);
+
+    const handleScroll = useCallback(() => {
+        const scrollTop = window.scrollY || document.documentElement.scrollTop;
+        const windowHeight = window.innerHeight;
+        const documentHeight = document.documentElement.scrollHeight;
+        const scrolledToBottom = Math.ceil(scrollTop + windowHeight) >= documentHeight;
+
+        if (scrolledToBottom) {
+            setReachedBottom(true);
+        }
+    }, []);
+
+    useEffect(() => {
+        window.addEventListener("scroll", handleScroll);
+        return () => {
+            window.removeEventListener("scroll", handleScroll);
+        };
+    }, [handleScroll]);
 
     if (loading) {
         return <LocationLoadingSkeleton />;
@@ -61,8 +63,7 @@ export default function LocationsPage() {
     return (
         <div>
             <div className="row d-flex justify-content-center align-items-center text-center bg-light mb-2 m-0" style={{ height: "200px" }}>
-                <div className="h1 fw-bold">Locations</div>
-                <Link to={"2"}>Check infinite scroll mechanism</Link>
+                <div className="h1 fw-bold">Locations infinite scroll pagination</div>
             </div>
             <div className="container">
                 <div className="row">
@@ -82,8 +83,6 @@ export default function LocationsPage() {
                         </div>
                     </div>
                 </div>
-
-                <Pagination route={"/locations"} info={info} />
             </div>
         </div>
     );
